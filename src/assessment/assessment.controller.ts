@@ -1,23 +1,32 @@
 import { Controller, Get, Param, Post, Body } from '@nestjs/common';
 import { AssessmentService } from './assessment.service';
-import { CreateSessionDto } from './dto/create-session.dto';
 import { ApiOperation, ApiOkResponse, ApiBody } from '@nestjs/swagger';
 import { QuestionDto } from './dto/question.dto';
 import { QuestionResultDto } from './dto/question-result.dto';
+import { CreateAssessmentDto } from './dto/CreateAssessmentDto';
+import { SessionDto } from './dto/create-session.dto';
+import { dot } from 'node:test/reporters';
 
 @Controller('assessment')
 export class AssessmentController {
-    constructor(private readonly service: AssessmentService) {}
+    constructor(private readonly service: AssessmentService) { }
 
     @Get('list')
-    listSession() {
-        return this.service.listSessions();
+    listAssessment() {
+        return this.service.listAssessment();
     }
 
     @Post('create')
     @ApiOperation({ summary: 'Création d\'un questionnaire' })
-    @ApiBody({ type: CreateSessionDto })
-    createSession(@Body() dto: CreateSessionDto) {
+    @ApiBody({ type: CreateAssessmentDto })
+    createAssessment(@Body() dto: CreateAssessmentDto) {
+        return this.service.createAssessment(dto);
+    }
+
+    @Post('session')
+    @ApiOperation({ summary: "Création d'une session" })
+    @ApiBody({ type: SessionDto })
+    createSession(@Body() dto: SessionDto) {
         return this.service.createSession(dto);
     }
 
@@ -28,7 +37,7 @@ export class AssessmentController {
     }
 
     @Post('submissions')
-    sendUserResult(@Body() dto: QuestionResultDto){
+    sendUserResult(@Body() dto: QuestionResultDto) {
         return this.service.sendUserResult(dto);
 
     }

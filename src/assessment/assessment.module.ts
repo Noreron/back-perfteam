@@ -5,9 +5,10 @@ import { AssessmentService } from './assessment.service';
 import { AssessmentSession } from './entities/assessment-session.entity';
 import { Question } from './entities/question.entity';
 import { QuestionResult } from './entities/question-result.entity';
+import { Assessment } from './entities/assessment.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([AssessmentSession, Question, QuestionResult])],
+  imports: [TypeOrmModule.forFeature([Assessment, AssessmentSession, Question, QuestionResult])],
   controllers: [AssessmentController],
   providers: [AssessmentService],
 })

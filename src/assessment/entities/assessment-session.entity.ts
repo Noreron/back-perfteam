@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { Question } from './question.entity';
+import { Assessment } from './assessment.entity';
 
 @Entity()
 export class AssessmentSession {
@@ -9,12 +10,6 @@ export class AssessmentSession {
   @Column({length: 10})
   slug: string;
 
-  @Column({ length: 200 })
-  title: string;
-
-  @Column({ type: 'text', nullable: true })
-  description?: string;
-
-  @OneToMany(() => Question, (q: Question) => q.session, { cascade: true })
-  questions: Question[];
+  @ManyToOne(() => Assessment, (assessment) => assessment.sessions)
+  assessment: Assessment;
 }

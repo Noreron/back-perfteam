@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
 import { AssessmentSession } from './assessment-session.entity';
 import { QuestionResult } from './question-result.entity';
+import { Assessment } from './assessment.entity';
 
 @Entity()
 export class Question {
@@ -13,8 +14,8 @@ export class Question {
   @Column({ length: 250, nullable: true })
   category?: string;
 
-  @ManyToOne(() => AssessmentSession, (s: AssessmentSession) => s.questions)
-  session: AssessmentSession;
+  @ManyToOne(() => Assessment, (q: Assessment) => q.questions)
+  assessment: Assessment;
 
   @OneToMany(() => QuestionResult, (r: QuestionResult) => r.question)
   results: QuestionResult[];
