@@ -14,7 +14,6 @@ export class QuestionResult {
   @ManyToOne(() => Question, (q: Question) => q.results, { nullable: false, onDelete: 'CASCADE' })
   question: Question;
 
-  // numeric value of the answer (e.g., score, rating). Use float to allow decimals.
   @Column({ type: 'float' })
   value: number;
 
