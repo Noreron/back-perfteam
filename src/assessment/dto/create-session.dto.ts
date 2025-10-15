@@ -3,6 +3,10 @@ import { ApiProperty } from "@nestjs/swagger";
 
 
 export class SessionDto {
+  
   @ApiProperty()
-  idAssessment: number
+  idAssessment: number;
+
+  @ApiProperty()
+  title: string;
 }

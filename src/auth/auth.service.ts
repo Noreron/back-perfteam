@@ -34,8 +34,8 @@ export class AuthService {
   private async createRefreshTokenInDb(user: User) {
     const token = require('crypto').randomBytes(64).toString('hex');
     const tokenHash = await bcrypt.hash(token, 10);
-    const expiresIn = process.env.JWT_REFRESH_TTL || '7d';
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // default 7d
+  const expiresIn = process.env.JWT_REFRESH_TTL || '7d';
+  const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000; // default 7d in ms
     const rt = this.tokenRepo.create({ tokenHash, user, expiresAt });
     await this.tokenRepo.save(rt);
     return { token, expiresAt };
@@ -58,14 +58,14 @@ export class AuthService {
     for (const t of tokens) {
       const match = await bcrypt.compare(refreshTokenPlain, t.tokenHash);
       if (match) {
-        if (t.expiresAt < new Date()) {
+        if (Number(t.expiresAt) < Date.now()) {
           await this.tokenRepo.remove(t);
           throw new UnauthorizedException('Refresh token expired');
         }
         const user = t.user;
         // rotate: remove old token and create new one
         await this.tokenRepo.remove(t);
-        const { token: newRefresh, expiresAt } = await this.createRefreshTokenInDb(user);
+  const { token: newRefresh, expiresAt } = await this.createRefreshTokenInDb(user);
         const accessToken = this.signAccessToken(user);
         return { accessToken, refreshToken: newRefresh, refreshExpiresAt: expiresAt };
       }

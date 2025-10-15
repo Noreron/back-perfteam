@@ -1,5 +1,4 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { Question } from './question.entity';
 import { Assessment } from './assessment.entity';
 
 @Entity()
@@ -9,6 +8,9 @@ export class AssessmentSession {
 
   @Column({length: 10})
   slug: string;
+
+  @Column({length: 250})
+  title: string;
 
   @ManyToOne(() => Assessment, (assessment) => assessment.sessions)
   assessment: Assessment;

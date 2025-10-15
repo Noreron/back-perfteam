@@ -1,17 +1,26 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, Index } from 'typeorm';
 import { Question } from './question.entity';
+import { AssessmentSession } from './assessment-session.entity';
 
 @Entity()
+@Index(['session', 'question'])
 export class QuestionResult {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Question, (q: Question) => q.results)
+  @ManyToOne(() => AssessmentSession, { nullable: false, onDelete: 'CASCADE' })
+  session: AssessmentSession;
+
+  @ManyToOne(() => Question, (q: Question) => q.results, { nullable: false, onDelete: 'CASCADE' })
   question: Question;
 
-  @Column({ type: 'int' })
-  score: number;
+  // numeric value of the answer (e.g., score, rating). Use float to allow decimals.
+  @Column({ type: 'float' })
+  value: number;
 
   @Column({ type: 'text', nullable: true })
   comment?: string;
+
+  @CreateDateColumn()
+  createdAt: Date;
 }

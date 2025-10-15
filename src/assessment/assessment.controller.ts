@@ -36,8 +36,10 @@ export class AssessmentController {
         return this.service.getQuestions(session);
     }
 
-    @Post('submissions')
-    sendUserResult(@Body() dto: QuestionResultDto) {
+    @Post(':session/submissions')
+    @ApiBody({ type: QuestionResultDto })
+    sendUserResult(@Param('session') session: string, @Body() dto: QuestionResultDto) {
+        if (!dto.sessionSlug) dto.sessionSlug = session;
         return this.service.sendUserResult(dto);
 
     }
@@ -45,5 +47,10 @@ export class AssessmentController {
     @Get(':session/result')
     getResult(@Param('session') session: string) {
         return this.service.getResults(Number(session));
+    }
+
+    @Get(':session/results/average')
+    getAverages(@Param('session') session: string) {
+        return this.service.getAveragesByQuestion(session);
     }
 }

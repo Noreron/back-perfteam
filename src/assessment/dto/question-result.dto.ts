@@ -1,11 +1,21 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ResultDto } from './result.dto';
 
-export class QuestionResultDto {
+export class QuestionAnswerDto {
+  @ApiProperty()
+  questionId: number;
 
   @ApiProperty()
-  session: string;
+  value: number;
 
-  @ApiProperty({ type: ResultDto, isArray: true})
-  answers: ResultDto[];
+  @ApiProperty({ required: false })
+  comment?: string;
+}
+
+export class QuestionResultDto {
+  @ApiProperty()
+  sessionSlug: string;
+
+  @ApiProperty({ type: [QuestionAnswerDto] })
+  answers: QuestionAnswerDto[];
+
 }

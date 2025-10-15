@@ -20,7 +20,7 @@ export class AuthController {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      expires: refreshExpiresAt,
+      expires: new Date(Number(refreshExpiresAt)),
       path: '/',
     });
     return { accessToken };
@@ -35,7 +35,7 @@ export class AuthController {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      expires: refreshExpiresAt,
+      expires: new Date(Number(refreshExpiresAt)),
       path: '/',
     });
     return { accessToken };

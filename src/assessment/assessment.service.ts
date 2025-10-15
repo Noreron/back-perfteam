@@ -42,7 +42,7 @@ export class AssessmentService {
 
     const assessment = await this.assessmentRepo.findOne({ 
         where: { 
-            id: dto.idAssessment 
+            id: dto.idAssessment,
         }
     });
 
@@ -53,13 +53,32 @@ export class AssessmentService {
     const session = this.sessionRepo.create({
       slug: this.randomSlug(6),
       assessment: assessment,
+      title: dto.title,
     });
 
     return this.sessionRepo.save(session)
   }
 
   async sendUserResult(dto: QuestionResultDto) {
+    // validate session exists
+    const session = await this.sessionRepo.findOne({ where: { slug: dto.sessionSlug } });
+    if (!session) throw new Error('Session not found');
 
+    const questionIds = dto.answers.map(a => a.questionId);
+    const questions = await this.questionRepo.findByIds(questionIds);
+    const foundIds = new Set(questions.map(q => q.id));
+    for (const id of questionIds) {
+      if (!foundIds.has(id)) throw new Error(`Question ${id} not found`);
+    }
+
+    const resultsToSave = dto.answers.map(a => this.resultRepo.create({
+      session: session,
+      question: questions.find(q => q.id === a.questionId),
+      value: a.value,
+      comment: a.comment,
+    }));
+
+    return this.resultRepo.save(resultsToSave);
   }
 
   async getQuestions(sessionId: string): Promise<Question[]> {
@@ -76,6 +95,20 @@ export class AssessmentService {
 
   async getResults(sessionId: number): Promise<QuestionResult[]> {
     return this.resultRepo.find({ where: { question: { session: { slug: sessionId } } } as any, relations: ['question'] });
+  }
+
+  // return average value per question for a session (by session slug)
+  async getAveragesByQuestion(sessionSlug: string) {
+    const qb = this.resultRepo.createQueryBuilder('r')
+      .select('r.questionId', 'questionId')
+      .addSelect('AVG(r.value)', 'avg')
+      .innerJoin('r.session', 's')
+      .where('s.slug = :slug', { slug: sessionSlug })
+      .groupBy('r.questionId');
+
+    const rows = await qb.getRawMany();
+    // map questionId -> avg
+    return rows.map(r => ({ questionId: Number(r.questionId), average: Number(r.avg) }));
   }
 
 

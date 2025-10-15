@@ -12,8 +12,9 @@ export class RefreshToken {
   @ManyToOne(() => User, (u) => u.refreshTokens)
   user: User;
 
-  @Column({ type: 'timestamp' })
-  expiresAt: Date;
+  // store expiry as milliseconds since epoch for cross-database compatibility
+  @Column({ type: 'bigint' })
+  expiresAt: number;
 
   @CreateDateColumn()
   createdAt: Date;
