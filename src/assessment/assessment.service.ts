@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { AssessmentSession } from './entities/assessment-session.entity';
 import { Question } from './entities/question.entity';
 import { QuestionResult } from './entities/question-result.entity';
@@ -40,10 +40,10 @@ export class AssessmentService {
 
   async createSession(dto: SessionDto): Promise<AssessmentSession> {
 
-    const assessment = await this.assessmentRepo.findOne({ 
-        where: { 
-            id: dto.idAssessment,
-        }
+    const assessment = await this.assessmentRepo.findOne({
+      where: {
+        id: dto.idAssessment,
+      }
     });
 
     if (!assessment) {
@@ -65,7 +65,7 @@ export class AssessmentService {
     if (!session) throw new Error('Session not found');
 
     const questionIds = dto.answers.map(a => a.questionId);
-    const questions = await this.questionRepo.findByIds(questionIds);
+    const questions = await this.questionRepo.findBy({ id: In(questionIds) });
     const foundIds = new Set(questions.map(q => q.id));
     for (const id of questionIds) {
       if (!foundIds.has(id)) throw new Error(`Question ${id} not found`);
@@ -99,16 +99,42 @@ export class AssessmentService {
 
   // return average value per question for a session (by session slug)
   async getAveragesByQuestion(sessionSlug: string) {
-    const qb = this.resultRepo.createQueryBuilder('r')
+    // Moyennes par question
+    const questionAveragesQb = this.resultRepo.createQueryBuilder('r')
       .select('r.questionId', 'questionId')
       .addSelect('AVG(r.value)', 'avg')
+      .addSelect('q.category', 'category')
       .innerJoin('r.session', 's')
+      .innerJoin('r.question', 'q')
       .where('s.slug = :slug', { slug: sessionSlug })
-      .groupBy('r.questionId');
+      .groupBy('r.questionId')
+      .addGroupBy('q.category');
 
-    const rows = await qb.getRawMany();
-    // map questionId -> avg
-    return rows.map(r => ({ questionId: Number(r.questionId), average: Number(r.avg) }));
+    // Moyennes par catégorie
+    const categoryAveragesQb = this.resultRepo.createQueryBuilder('r')
+      .select('q.category', 'category')
+      .addSelect('AVG(r.value)', 'avg')
+      .innerJoin('r.session', 's')
+      .innerJoin('r.question', 'q')
+      .where('s.slug = :slug', { slug: sessionSlug })
+      .groupBy('q.category');
+
+    const [questionRows, categoryRows] = await Promise.all([
+      questionAveragesQb.getRawMany(),
+      categoryAveragesQb.getRawMany()
+    ]);
+
+    return {
+      questionAverages: questionRows.map(r => ({
+        questionId: Number(r.questionId),
+        category: r.category,
+        average: Number(r.avg)
+      })),
+      categoryAverages: categoryRows.map(r => ({
+        category: r.category,
+        average: Number(r.avg)
+      }))
+    };
   }
 
 

@@ -36,7 +36,7 @@ export class AssessmentController {
         return this.service.getQuestions(session);
     }
 
-    @Post(':session/submissions')
+    @Post('/submissions')
     @ApiBody({ type: QuestionResultDto })
     sendUserResult(@Param('session') session: string, @Body() dto: QuestionResultDto) {
         if (!dto.sessionSlug) dto.sessionSlug = session;
