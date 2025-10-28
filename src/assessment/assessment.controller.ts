@@ -6,6 +6,7 @@ import { QuestionResultDto } from './dto/question-result.dto';
 import { CreateAssessmentDto } from './dto/CreateAssessmentDto';
 import { SessionDto } from './dto/create-session.dto';
 import { dot } from 'node:test/reporters';
+import { SessionAveragesDto } from './dto/averages.dto';
 
 @Controller('assessment')
 export class AssessmentController {
@@ -38,8 +39,7 @@ export class AssessmentController {
 
     @Post('/submissions')
     @ApiBody({ type: QuestionResultDto })
-    sendUserResult(@Param('session') session: string, @Body() dto: QuestionResultDto) {
-        if (!dto.sessionSlug) dto.sessionSlug = session;
+    sendUserResult(@Body() dto: QuestionResultDto) {
         return this.service.sendUserResult(dto);
 
     }
@@ -49,7 +49,13 @@ export class AssessmentController {
         return this.service.getResults(Number(session));
     }
 
+
+      // return average value per question for a session (by session slug)
+
     @Get(':session/results/average')
+    @ApiOkResponse({
+    type: SessionAveragesDto,
+    description: 'Moyennes des réponses par question et par catégorie'})
     getAverages(@Param('session') session: string) {
         return this.service.getAveragesByQuestion(session);
     }

@@ -8,6 +8,8 @@ import { SessionDto } from './dto/create-session.dto';
 import { QuestionResultDto } from './dto/question-result.dto';
 import { CreateAssessmentDto } from './dto/CreateAssessmentDto';
 import { Assessment } from './entities/assessment.entity';
+import { ApiResponse } from '@nestjs/swagger';
+import { SessionAveragesDto } from './dto/averages.dto';
 
 @Injectable()
 export class AssessmentService {
@@ -60,8 +62,7 @@ export class AssessmentService {
   }
 
   async sendUserResult(dto: QuestionResultDto) {
-    // validate session exists
-    const session = await this.sessionRepo.findOne({ where: { slug: dto.sessionSlug } });
+    const session = await this.sessionRepo.findOne({ where: { slug: dto.session } });
     if (!session) throw new Error('Session not found');
 
     const questionIds = dto.answers.map(a => a.questionId);
@@ -97,8 +98,7 @@ export class AssessmentService {
     return this.resultRepo.find({ where: { question: { session: { slug: sessionId } } } as any, relations: ['question'] });
   }
 
-  // return average value per question for a session (by session slug)
-  async getAveragesByQuestion(sessionSlug: string) {
+  async getAveragesByQuestion(sessionSlug: string): Promise<SessionAveragesDto> {
     // Moyennes par question
     const questionAveragesQb = this.resultRepo.createQueryBuilder('r')
       .select('r.questionId', 'questionId')

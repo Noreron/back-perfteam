@@ -13,7 +13,7 @@ export class QuestionAnswerDto {
 
 export class QuestionResultDto {
   @ApiProperty()
-  sessionSlug: string;
+  session: string;
 
   @ApiProperty({ type: [QuestionAnswerDto] })
   answers: QuestionAnswerDto[];
